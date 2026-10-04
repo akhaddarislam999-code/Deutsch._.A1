@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Deutsch A1 – Unit 1 + 2</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5fa;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:#172554;color:white;padding:24px 18px;text-align:center}
+header h1{margin:0;font-size:27px}
+header p{margin:7px 0 0;opacity:.9}
+main{max-width:720px;margin:auto;padding:15px}
+.card{background:#fff;border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 5px 18px rgba(0,0,0,.08)}
+h2{margin-top:0}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:13px;padding:14px 12px;font-size:16px;background:#172554;color:white;cursor:pointer}
+button.secondary{background:#e8ecf7;color:#172554}
+button.option{display:block;width:100%;text-align:left;background:#eef2ff;color:#172033;margin:9px 0}
+button.option.correct{background:#bbf7d0}
+button.option.wrong{background:#fecaca}
+.score{font-weight:700;font-size:19px}
+.question{font-size:23px;font-weight:700;margin:18px 0}
+.emoji{font-size:60px;text-align:center}
+.badge{display:inline-block;background:#e8ecf7;padding:6px 10px;border-radius:99px;margin:3px}
+.hidden{display:none}
+.review p{line-height:1.65}
+.good{color:#15803d}.bad{color:#b91c1c}
+.big{font-size:52px;text-align:center;font-weight:800}
+@media(max-width:520px){.menu{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<header>
+<h1>🇩🇪 Deutsch A1</h1>
+<p>Unit 1 + Unit 2 • mein/dein • Akkusativ</p>
+</header>
+
+<main id="app">
+<section class="card">
+<h2>📚 Deutsch A1 – مراجعة شاملة</h2>
+<p>اختار القسم اللي بغيتي. كل جواب صحيح كيحسب نقطة، وفي النهاية كتشوف النسبة ديالك.</p>
+
+<div class="menu">
+<button onclick="startQuiz('artikel')">🔤 der / die / das</button>
+<button onclick="startQuiz('poss')">🏠 mein / dein</button>
+<button onclick="startQuiz('akk')">🔴 Akkusativ</button>
+<button onclick="startQuiz('verbs')">🔧 الأفعال</button>
+<button onclick="startQuiz('objects')">🖼️ الأشياء</button>
+<button onclick="startQuiz('mixed')">🧠 اختبار مختلط</button>
+<button onclick="showReview()">📖 المراجعة</button>
+<button onclick="startQuiz('exam')">🏆 Final Exam</button>
+</div>
+</section>
+
+<section class="card">
+<div class="score" id="scoreBox">📊 النتيجة: 0 / 0 — 0%</div>
+<button class="secondary" onclick="showMistakes()">❌ أخطائي</button>
+<button class="secondary" onclick="resetAll()">🔄 تصفير</button>
+</section>
+</main>
+
+<script>
+"use strict";
+
+const DATA = {
+
+artikel: [
+["Mann","der"],["Frau","die"],["Buch","das"],
+["Computer","der"],["Tasche","die"],["Handy","das"],
+["Stuhl","der"],["Tür","die"],["Fenster","das"],
+["Schlüssel","der"],["Uhr","die"],["Bild","das"]
+],
+
+poss: [
+["Das ist ___ Vater.","mein",["mein","meine","meinen"]],
+["Das ist ___ Mutter.","meine",["mein","meine","meinen"]],
+["Das ist ___ Buch.","mein",["mein","meine","meinen"]],
+["Das sind ___ Freunde.","meine",["mein","meine","meinen"]],
+["Das ist ___ Vater.","dein",["dein","deine","deinen"]],
+["Das ist ___ Mutter.","deine",["dein","deine","deinen"]],
+["Das ist ___ Buch.","dein",["dein","deine","deinen"]],
+["Das sind ___ Freunde.","deine",["dein","deine","deinen"]],
+["Das ist ___ Vater.","sein",["sein","seine","seinen"]],
+["Das ist ___ Tasche.","ihre",["ihr","ihre","ihren"]],
+["Das ist ___ Haus.","unser",["unser","unsere","unseren"]],
+["Das ist ___ Lehrer.","euer",["euer","eure","euren"]]
+],
+
+akk: [
+["Ich sehe ___ Mann.","den",["den","die","das"]],
+["Ich sehe ___ Frau.","die",["den","die","das"]],
+["Ich habe ___ Buch.","ein",["ein","einen","eine"]],
+["Ich habe ___ Bruder.","einen",["ein","einen","eine"]],
+["Ich sehe ___ Vater.","meinen",["mein","meinen","meine"]],
+["Ich sehe ___ Mutter.","meine",["mein","meinen","meine"]],
+["Ich sehe ___ Handy.","mein",["mein","meinen","meine"]],
+["Du siehst ___ Vater.","deinen",["dein","deinen","deine"]],
+["Er besucht ___ Mutter.","seine",["sein","seinen","seine"]],
+["Wir besuchen ___ Bruder.","unseren",["unser","unseren","unsere"]],
+["Ich kaufe ___ Computer.","meinen",["mein","meinen","meine"]],
+["Ich kaufe ___ Tasche.","meine",["mein","meinen","meine"]]
+],
+
+verbs: [
+["Ich ___ aus Marokko.","komme",["komme","kommst","kommt"]],
+["Du ___ in Tanger.","wohnst",["wohne","wohnst","wohnt"]],
+["Er ___ Deutsch.","spricht",["spreche","sprichst","spricht"]],
+["Ich ___ Student.","bin",["bin","bist","ist"]],
+["Wir ___ in Marokko.","wohnen",["wohne","wohnt","wohnen"]],
+["Ich ___ ein Handy.","habe",["habe","hast","hat"]],
+["Wie ___ du?","heißt",["heiße","heißt","heißen"]],
+["Sie ___ aus Deutschland.","kommt",["komme","kommst","kommt"]]
+],
+
+objects: [
+["📕","das Buch"],
+["🖊️","der Kugelschreiber"],
+["🎒","die Tasche"],
+["📱","das Handy"],
+["🔑","der Schlüssel"],
+["🪑","der Stuhl"],
+["🚪","die Tür"],
+["💻","der Computer"]
+]
+
+};
+
+let score=0;
+let total=0;
+let mistakes=[];
+let current=null;
+
+function shuffle(arr){
+return [...arr].sort(()=>Math.random()-0.5);
+}
+
+function el(id){
+return document.getElementById(id);
+}
+
+function updateScore(){
+const pct=total?Math.round(score/total*100):0;
+const box=el("scoreBox");
+if(box) box.textContent=`📊 النتيجة: ${score} / ${total} — ${pct}%`;
+}
+
+function home(){
+
+el("app").innerHTML=`
+
+<section class="card">
+<h2>🇩🇪 Deutsch A1</h2>
+<p>Unit 1 + Unit 2 • اختار التمرين:</p>
+
+<div class="menu">
+<button onclick="startQuiz('artikel')">🔤 der / die / das</button>
+<button onclick="startQuiz('poss')">🏠 mein / dein / sein</button>
+<button onclick="startQuiz('akk')">🔴 Akkusativ</button>
+<button onclick="startQuiz('verbs')">🔧 تصريف الأفعال</button>
+<button onclick="startQuiz('objects')">🖼️ الأشياء</button>
+<button onclick="startQuiz('mixed')">🧠 اختبار مختلط</button>
+<button onclick="showReview()">📖 مراجعة</button>
+<button onclick="startQuiz('exam')">🏆 Final Exam</button>
+</div>
+</section>
+
+<section class="card">
+<div class="score" id="scoreBox">📊 النتيجة: 0 / 0 — 0%</div>
+<button class="secondary" onclick="showMistakes()">❌ أخطائي</button>
+<button class="secondary" onclick="resetAll()">🔄 تصفير</button>
+</section>`;
+
+updateScore();
+}
+
+function showReview(){
+
+el("app").innerHTML=`
+
+<section class="card review">
+<h2>📖 مراجعة Unit 1 + 2</h2>
+
+<p><b>Personalpronomen:</b> ich, du, er, sie, es, wir, ihr, Sie</p>
+
+<p><b>Artikel:</b> der = مذكر، die = مؤنث، das = محايد.</p>
+
+<p><b>Possessivartikel:</b> mein, dein, sein, ihr, unser, euer, Ihr.</p>
+
+<p><b>Akkusativ:</b>
+der → <b>den</b>،
+ein → <b>einen</b>،
+mein → <b>meinen</b>،
+dein → <b>deinen</b>.
+</p>
+
+<p>die → die، das → das، والجمع → die.</p>
+
+<p>
+<b>أمثلة:</b><br>
+Ich sehe <b>den Mann</b>.<br>
+Ich habe <b>meinen Bruder</b>.<br>
+Ich kaufe <b>meine Tasche</b>.
+</p>
+
+<button onclick="home()">← الرئيسية</button>
+
+</section>`;
+}
+
+function startQuiz(type){
+
+let items;
+let title;
+
+if(type==="artikel"){
+items=DATA.artikel;
+title="🔤 DER / DIE / DAS";
+}
+
+else if(type==="poss"){
+items=DATA.poss;
+title="🏠 Possessivartikel";
+}
+
+else if(type==="akk"){
+items=DATA.akk;
+title="🔴 Akkusativ";
+}
+
+else if(type==="verbs"){
+items=DATA.verbs;
+title="🔧 Verben";
+}
+
+else if(type==="objects"){
+items=DATA.objects;
+title="🖼️ Was ist das?";
+}
+
+else{
+items=shuffle([
+...DATA.akk,
+...DATA.verbs,
+...DATA.poss,
+...DATA.artikel
+]).slice(0,20);
+
+title=type==="exam"?"🏆 FINAL EXAM":"🧠 MIXED QUIZ";
+}
+
+current={
+items:shuffle(items),
+index:0,
+title
+};
+
+renderQuestion();
+}
+
+function renderQuestion(){
+
+if(current.index>=current.items.length){
+finishQuiz();
+return;
+}
+
+const q=current.items[current.index];
+const question=q[0];
+const answer=q[1];
+
+let options=q[2];
+
+if(!options){
+
+let pool=current.items
+.map(x=>x[1])
+.filter(x=>x!==answer);
+
+options=shuffle([answer,...pool]).slice(0,3);
+
+}else{
+
+options=shuffle(options);
+
+}
+
+let visual="";
+
+if(current.title.includes("Was ist das?")){
+visual=`<div class="emoji">${question}</div>`;
+}
+
+el("app").innerHTML=`
+
+<section class="card">
+
+<span class="badge">${current.title}</span>
+<span class="badge">${current.index+1}/${current.items.length}</span>
+
+${visual}
+
+<div class="question">
+${visual ? "Was ist das?" : question}
+</div>
+
+<div id="options">
+
+${options.map(o=>
+`<button class="option" data-answer="${escapeAttr(o)}">${o}</button>`
+).join("")}
+
+</div>
+
+<p id="feedback"></p>
+
+<button class="secondary" onclick="home()">خروج</button>
+
+</section>`;
+
+document.querySelectorAll(".option").forEach(btn=>{
+btn.addEventListener("click",()=>choose(btn,answer,question));
+});
+
+}
+
+function choose(btn,answer,question){
+
+document.querySelectorAll(".option")
+.forEach(b=>b.disabled=true);
+
+total++;
+
+const value=btn.getAttribute("data-answer");
+
+if(value.toLowerCase()===answer.toLowerCase()){
+
+score++;
+
+btn.classList.add("correct");
+
+el("feedback").innerHTML=
+"<span class='good'>✅ Richtig! +1 Punkt</span>";
+
+}else{
+
+btn.classList.add("wrong");
+
+mistakes.push([question,answer]);
+
+el("feedback").innerHTML=
+"<span class='bad'>❌ Falsch — الصحيح: <b>"
++answer+
+"</b></span>";
+}
+
+updateScore();
+
+setTimeout(()=>{
+current.index++;
+renderQuestion();
+},800);
+
+}
+
+function finishQuiz(){
+
+const earned=total?
+Math.round((score/total)*100):0;
+
+let message;
+
+if(earned>=90)
+message="🏆 ممتاز!";
+
+else if(earned>=80)
+message="👏 جيد جداً!";
+
+else if(earned>=70)
+message="👍 جيد!";
+
+else if(earned>=60)
+message="📚 خاصك شوية مراجعة.";
+
+else
+message="🔄 عاود المراجعة.";
+
+el("app").innerHTML=`
+
+<section class="card">
+
+<h2>${current.title}</h2>
+
+<div class="big">${earned}%</div>
+
+<p class="score">
+${score} نقطة صحيحة من ${total}
+</p>
+
+<p>${message}</p>
+
+<button onclick="home()">← الرئيسية</button>
+
+<button class="secondary"
+onclick="showMistakes()">❌ الأخطاء</button>
+
+</section>`;
+}
+
+function showMistakes(){
+
+el("app").innerHTML=`
+
+<section class="card">
+
+<h2>❌ أخطائي</h2>
+
+${
+mistakes.length
+?
+mistakes.map((m,i)=>
+`<p>
+<b>${i+1}. ${m[0]}</b><br>
+✅ ${m[1]}
+</p>`
+).join("")
+:
+"<p class='good'>🎉 ما عندك حتى خطأ مسجل.</p>"
+}
+
+<button onclick="home()">← الرئيسية</button>
+
+</section>`;
+}
+
+function resetAll(){
+
+score=0;
+total=0;
+mistakes=[];
+
+home();
+}
+
+function escapeAttr(s){
+
+return String(s)
+.replace(/&/g,"&amp;")
+.replace(/"/g,"&quot;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;");
+}
+
+updateScore();
+
+</script>
+
+</body>
+</html>
